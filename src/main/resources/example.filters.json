@@ -1,0 +1,119 @@
+{
+  "filters": [
+    {
+      "name": "diamond_armor",
+      "items": [
+        "diamond_helmet",
+        "diamond_chestplate",
+        "diamond_leggings",
+        "diamond_boots"
+      ]
+    },
+    {
+      "name": "diamond_tools",
+      "items": [
+        "diamond_pickaxe",
+        "diamond_axe",
+        "diamond_shovel",
+        "diamond_hoe",
+        "diamond_sword"
+      ]
+    },
+    {
+      "name": "horse_armor",
+      "items": [
+        "_horse_armor"
+      ]
+    },
+    {
+      "name": "flowers",
+      "items": [
+        "allium",
+        "azure_bluet",
+        "blue_orchid",
+        "cornflower",
+        "dandelion",
+        "lily_of_the_valley",
+        "oxeye_daisy",
+        "poppy",
+        "torch_flower",
+        "orange_tulip",
+        "pink_tulip",
+        "red_tulip",
+        "white_tulip",
+        "wither_rose",
+        "lilac",
+        "peony",
+        "pitcher_plant",
+        "rose_bush",
+        "sunflower"
+      ]
+    },
+    {
+      "name": "dye",
+      "items": [
+        "_dye"
+      ]
+    },
+    {
+      "name": "sherd",
+      "items": [
+        "_sherd"
+      ]
+    },
+    {
+      "name": "armor_trims",
+      "items": [
+        "_trim_smithing_template"
+      ]
+    },
+    {
+      "name": "stained_glass",
+      "items": [
+        "_stained_glass"
+      ]
+    },
+    {
+      "name": "stained_glass_panes",
+      "items": [
+        "_stained_glass_pane"
+      ]
+    },
+    {
+      "name": "wool",
+      "items": [
+        "_wool"
+      ]
+    },
+    {
+      "name": "concrete",
+      "items": [
+        "_concrete"
+      ]
+    },
+    {
+      "name": "concrete_powder",
+      "items": [
+        "_concrete_powder"
+      ]
+    },
+    {
+      "name": "candles",
+      "items": [
+        "_candle"
+      ]
+    },
+    {
+      "name": "terracotta",
+      "items": [
+        "_terracotta"
+      ]
+    },
+    {
+      "name": "glazed_terracotta",
+      "items": [
+        "_glazed_terracotta"
+      ]
+    }
+  ]
+}

@@ -7,23 +7,3 @@ notion:
 
 # Frequency in which the local data is updated
 update-frequency: "600000" # In Milliseconds
-
-# List of alternative naming for condensed groups of items
-filters:
-  diamond_armor: ["diamond_helmet", "diamond_chestplate", "diamond_leggings", "diamond_boots"]
-  flowers: ["allium", "azure_bluet", "blue_orchid", "cornflower", "dandelion", "lily_of_the_valley", "oxeye_daisy",
-        "poppy", "torch_flower", "orange_tulip", "pink_tulip", "red_tulip", "white_tulip", "wither_rose", "lilac",
-        "peony", "pitcher_plant", "rose_bush", "sunflower"]
-  diamond_tools: ["diamond_pickaxe", "diamond_axe", "diamond_shovel", "diamond_hoe", "diamond_sword" ]
-  horse_armor: "_horse_armor"
-  dye: "_dye"
-  sherd: "_sherd"
-  armor_trims: "_trim_smithing_template"
-  stained_glass: "_stained_glass"
-  stained_glass_panes: "_stained_glass_pane"
-  wool: "_wool"
-  concrete: "_concrete"
-  concrete_powder: "_concrete_powder"
-  candles: "_candle"
-  terracotta: "_terracotta"
-  glazed_terracotta: "_glazed_terracotta"
