@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 import io.github.branhardy.shopLookup.models.Shop;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ResponseUtil {
@@ -24,20 +25,18 @@ public class ResponseUtil {
             String title = extractTitle(properties.getAsJsonObject("Shop Name"));
             String coordinates = extractRichText(properties.getAsJsonObject("Coords (X, Z)"));
             List<String> district = extractMultiSelect(properties.getAsJsonObject("Spawn"));
-            List<String> inventory = extractMultiSelect(properties.getAsJsonObject("Inventory"));
-            //String inventory = extractRichText(properties.getAsJsonObject("Inventory"));
+            //List<String> inventory = extractMultiSelect(properties.getAsJsonObject("Inventory"));
+            String inventory = extractRichText(properties.getAsJsonObject("Inventory"));
             String owners = extractRichText(properties.getAsJsonObject("Owner IGN"));
 
-            /*
             List<String> inventoryList = Arrays.asList(inventory.split("\\s*,\\s*"));
-            */
 
-            for (String item : inventory) {
+            for (String item : inventoryList) {
                 String modifiedItem = item.toLowerCase().replace(" ", "_");
-                inventory.set(inventory.indexOf(item), modifiedItem);
+                inventoryList.set(inventory.indexOf(item), modifiedItem);
             }
 
-            Shop shop = new Shop(title, coordinates, inventory, !district.isEmpty() ? district.getFirst() : "", owners);
+            Shop shop = new Shop(title, coordinates, inventoryList, !district.isEmpty() ? district.getFirst() : "", owners);
             shops.add(shop);
         }
 
