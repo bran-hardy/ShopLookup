@@ -6,4 +6,4 @@ notion:
   database: ""
 
 # Frequency in which the local data is updated
-update-frequency: "600000" # In Milliseconds
+update-frequency: 600000 # In Milliseconds

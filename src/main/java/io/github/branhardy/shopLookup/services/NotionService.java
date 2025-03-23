@@ -32,7 +32,6 @@ public class NotionService {
         HttpResponse<String> response = null;
 
         try {
-            ShopLookup.getPlugin().getLogger().info("");
             response = client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException ie) {
             ShopLookup.getPlugin().getLogger().severe("Failed to get data from Notion");

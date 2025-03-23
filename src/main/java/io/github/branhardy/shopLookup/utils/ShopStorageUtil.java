@@ -36,8 +36,11 @@ public class ShopStorageUtil {
         }
 
         if (System.currentTimeMillis() > shopStorage.getExpiryTime()) {
+            ShopLookup.getPlugin().getLogger().info("Current: " + System.currentTimeMillis());
+            ShopLookup.getPlugin().getLogger().info("Cache: " + shopStorage.getExpiryTime());
             ShopLookup.getPlugin().getLogger().info("Updating shops.json");
             long duration = ShopLookup.getPlugin().getConfig().getLong("update-frequency");
+            ShopLookup.getPlugin().getLogger().info("Duration: " + duration);
             long newExpiryTime = System.currentTimeMillis() + duration;
 
             String response = notionService.queryDatabase(database);
