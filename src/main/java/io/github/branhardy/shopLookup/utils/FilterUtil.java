@@ -19,6 +19,9 @@ public class FilterUtil {
             ShopLookup.getPlugin().getLogger().info("filters.json are loaded");
         } else {
             ShopLookup.getPlugin().getLogger().info("filters.json could not be found");
+            if (file.createNewFile()) {
+                ShopLookup.getPlugin().getLogger().info("Created an empty filters.json file");
+            }
         }
 
         return filters;
