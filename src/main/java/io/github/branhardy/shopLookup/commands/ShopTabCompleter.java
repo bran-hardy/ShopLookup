@@ -1,6 +1,7 @@
 package io.github.branhardy.shopLookup.commands;
 
-import org.bukkit.Material;
+import io.github.branhardy.shopLookup.ShopLookup;
+import io.github.branhardy.shopLookup.models.Shop;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -9,7 +10,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class ShopTabCompleter implements TabCompleter {
 
@@ -18,12 +18,8 @@ public class ShopTabCompleter implements TabCompleter {
         List<String> suggestions = new ArrayList<>();
 
         if (args.length == 1) {
-            String input = args[0].toUpperCase(Locale.ROOT);
-
-            for (Material material : Material.values()) {
-                if (material.name().contains(input)) {
-                    suggestions.add("minecraft:" + material.name().toLowerCase(Locale.ROOT));
-                }
+            for (Shop shop : ShopLookup.getShopStorage().getShops()) {
+                suggestions.addAll(shop.getInventory());
             }
         }
 

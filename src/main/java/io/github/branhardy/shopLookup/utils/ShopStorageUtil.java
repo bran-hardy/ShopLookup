@@ -16,31 +16,18 @@ public class ShopStorageUtil {
 
         try {
             shopStorage = loadData(notionService, database);
-            ShopLookup.getPlugin().getLogger().info("Loaded shops.json");
         } catch (IOException e) {
-            ShopLookup.getPlugin().getLogger().info("Failed to load shops.json");
+            ShopLookup.getPlugin().getLogger().severe("Failed to load shops.json");
         }
 
         return shopStorage.getShops();
     }
 
     public static ShopStorage loadData(NotionService notionService, String database) throws IOException {
-        ShopStorage shopStorage = new ShopStorage(0, List.of());
-
-        Gson gson = new Gson();
-        File file = new File(ShopLookup.getPlugin().getDataFolder().getAbsoluteFile() + "/shops.json");
-
-        if (file.exists()) {
-            Reader reader = new FileReader(file);
-            shopStorage = gson.fromJson(reader, ShopStorage.class);
-        }
+        ShopStorage shopStorage = loadFromFile();
 
         if (System.currentTimeMillis() > shopStorage.getExpiryTime()) {
-            ShopLookup.getPlugin().getLogger().info("Current: " + System.currentTimeMillis());
-            ShopLookup.getPlugin().getLogger().info("Cache: " + shopStorage.getExpiryTime());
-            ShopLookup.getPlugin().getLogger().info("Updating shops.json");
             long duration = ShopLookup.getPlugin().getConfig().getLong("update-frequency");
-            ShopLookup.getPlugin().getLogger().info("Duration: " + duration);
             long newExpiryTime = System.currentTimeMillis() + duration;
 
             String response = notionService.queryDatabase(database);
@@ -53,23 +40,27 @@ public class ShopStorageUtil {
         return shopStorage;
     }
 
-    public static void updateData(ShopStorage shopStorage) throws IOException {
+    public static ShopStorage loadFromFile() {
+        ShopStorage shopStorage = new ShopStorage(0, List.of());
+
         Gson gson = new Gson();
         File file = new File(ShopLookup.getPlugin().getDataFolder().getAbsoluteFile() + "/shops.json");
 
-        /* Used for testing
-        if (file.getParentFile().mkdir()) {
-            ShopLookup.getPlugin().getLogger().info(" - Directory created for shop data");
-        } else {
-            ShopLookup.getPlugin().getLogger().info(" - Directory already exists for shop data");
+        if (file.exists()) {
+            try {
+                Reader reader = new FileReader(file);
+                shopStorage = gson.fromJson(reader, ShopStorage.class);
+            } catch (IOException ioException) {
+                ShopLookup.getPlugin().getLogger().severe("Failed to load shop data from file.");
+            }
         }
 
-        if (file.createNewFile()) {
-            ShopLookup.getPlugin().getLogger().info(" - File created for shop data");
-        } else {
-            ShopLookup.getPlugin().getLogger().info(" - File already exists for shop data");
-        }
-        */
+        return shopStorage;
+    }
+
+    public static void updateData(ShopStorage shopStorage) throws IOException {
+        Gson gson = new Gson();
+        File file = new File(ShopLookup.getPlugin().getDataFolder().getAbsoluteFile() + "/shops.json");
 
         Writer writer = new FileWriter(file, false);
         gson.toJson(shopStorage, writer);

@@ -22,10 +22,6 @@ public class Shop {
         this.owners = owners;
     }
 
-    public String getOwners() {
-        return this.owners;
-    }
-
     public List<String> getInventory() {
         return this.inventory;
     }
@@ -36,10 +32,12 @@ public class Shop {
                 .content("Owners: " + this.owners)
                 .build();
 
+        String districtString = this.district.isEmpty() ? "" : ", " + this.district;
+
         return text()
                 .content(" - " + this.name).color(NamedTextColor.DARK_AQUA)
                 .append(text(": ", NamedTextColor.WHITE))
-                .append(text(this.coordinates + ", " + this.district, NamedTextColor.GREEN))
+                .append(text(this.coordinates + districtString, NamedTextColor.GREEN))
                 .hoverEvent(ownerInfo)
                 .build();
     }
