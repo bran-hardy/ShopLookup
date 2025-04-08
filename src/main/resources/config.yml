@@ -2,7 +2,7 @@
 notion:
   api-url: "https://api.notion.com/v1/databases/"
   version: "2022-06-28"
-  api-key: ""
+  api-key: "{{ NOTION_API_KEY }}"
   database: ""
 
 # Frequency in which the local data is updated

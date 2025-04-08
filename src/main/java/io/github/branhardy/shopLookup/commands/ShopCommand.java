@@ -3,77 +3,88 @@ package io.github.branhardy.shopLookup.commands;
 import io.github.branhardy.shopLookup.ShopLookup;
 import io.github.branhardy.shopLookup.models.Filters;
 import io.github.branhardy.shopLookup.models.Shop;
-import io.github.branhardy.shopLookup.services.NotionService;
 import io.github.branhardy.shopLookup.utils.FilterUtil;
 import io.github.branhardy.shopLookup.utils.ShopStorageUtil;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.scheduler.BukkitScheduler;
-import org.jetbrains.annotations.NotNull;
+import org.incendo.cloud.annotations.*;
+import org.incendo.cloud.annotations.processing.CommandContainer;
+import org.incendo.cloud.annotations.suggestion.Suggestions;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static net.kyori.adventure.text.Component.text;
 
-public class ShopCommand implements CommandExecutor {
+@CommandContainer
+public class ShopCommand {
 
-    private final NotionService notionService;
-    private final String database;
-    private final BukkitScheduler scheduler;
+    @Suggestions("item-suggestions")
+    public List<String> provideItemSuggestions(CommandSourceStack sourceStack, String current) {
+        List<Shop> shops = ShopLookup.plugin.getShopStorage().getShops();
 
-    public ShopCommand(NotionService notionService, String database, BukkitScheduler schedular) {
-        this.notionService = notionService;
-        this.database = database;
-        this.scheduler = schedular;
-    }
+        // Gets only unique items being sold in shops, prevent duplicate names
+        Set<String> suggestions = shops.stream()
+                .flatMap(shop -> shop.getInventory().stream())
+                .map(String::toLowerCase)
+                .collect(Collectors.toSet());
 
-    @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String @NotNull [] args) {
-        if (args.length != 1) {
-            return false;
+        // If an item from a shop is the filter name, add the appropriate items
+        // i.e. filter.name = "diamond_armor", add "diamond_helmet", "diamond_chestplate", etc...
+        Filters filters = ShopLookup.plugin.getFilters();
+        for (String filterName : filters.getFilters().keySet()) {
+            List<String> filterItems = filters.getFilterItems(filterName);
+
+            if (suggestions.contains(filterName)) {
+                suggestions.addAll(filterItems);
+            }
         }
 
-        String targetItem = args[0].replace("minecraft:", "");
+        return suggestions.stream()
+                .filter(item -> item.startsWith(current.toLowerCase()))
+                .collect(Collectors.toList());
+    }
 
-        scheduler.runTaskAsynchronously(ShopLookup.getPlugin(), () -> executeShopTask(sender, targetItem));
+    @Command("shop [item]")
+    @CommandDescription("Search for shops that sell the specified item.")
+    @Permission("shoplookup.shopcommand")
+    public void shopCommand(
+            CommandSourceStack sourceStack,
+            @Argument(value = "item", suggestions = "item-suggestions") final @Nullable String item
+    ) {
+        CommandSender sender = sourceStack.getSender();
 
-        return true;
+        ShopLookup.plugin
+                .getServer()
+                .getScheduler()
+                .runTaskAsynchronously(ShopLookup.plugin, () -> executeShopTask(sender, item));
     }
 
     private void executeShopTask(CommandSender sender, String targetItem) {
-        List<Shop> shops = ShopStorageUtil.getShops(notionService, database);
+        List<Shop> shops = ShopStorageUtil.getShops(ShopLookup.getNotionService());
 
         String adjustedTargetItem = searchFilters(targetItem);
 
-        List<Shop> shopsWithSearchItem = new ArrayList<>();
-        for (Shop shop : shops) {
-            if (shop.getInventory().contains(adjustedTargetItem)) {
-                shopsWithSearchItem.add(shop);
-            }
-        }
+        List<Shop> shopsWithSearchItem = shops.stream()
+                .filter(shop -> shop.getInventory().contains(adjustedTargetItem)).collect(Collectors.toList());
 
         sendInfo(sender, targetItem, shopsWithSearchItem);
     }
 
     private String searchFilters(String targetItem) {
-        Filters filters;
+        Filters filters = FilterUtil.loadData();
+        if (filters == null) return targetItem;
 
-        try {
-            filters = FilterUtil.loadData();
+        // Update local filters in-case there was an update to the file
+        ShopLookup.plugin.updateLocalFilters(filters);
 
-            String filterName = filters.GetFilterName(targetItem);
+        String filterName = filters.getFilterName(targetItem);
 
-            return !filterName.isEmpty() ? filterName : targetItem;
-        } catch (IOException e) {
-            ShopLookup.getPlugin().getLogger().warning("Failed to load Filters.");
-
-            return targetItem;
-        }
+        return !filterName.isEmpty() ? filterName : targetItem;
     }
 
     private void sendInfo(CommandSender sender, String targetItem, List<Shop> shops) {

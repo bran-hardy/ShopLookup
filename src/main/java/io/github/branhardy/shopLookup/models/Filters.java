@@ -2,39 +2,42 @@ package io.github.branhardy.shopLookup.models;
 
 import org.bukkit.Material;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 public class Filters {
-    private final List<Filter> filters;
+    private final Map<String, List<String>> filters;
 
-    public Filters(List<Filter> filters) {
+    public Filters(Map<String, List<String>> filters) {
         this.filters = filters;
     }
 
-    public String GetFilterName (String item) {
-        String filterName = "";
-
-        for (Filter filter : filters) {
-            List<String> grouping;
-
-            if (filter.getItems().getFirst().startsWith("_")) {
-                grouping = Arrays.stream(Material.values())
-                        .map(material -> material.name().toLowerCase(Locale.ROOT))
-                        .filter(name -> name.endsWith(filter.getItems().getFirst()))
-                        .toList();
-            }
-            else {
-                grouping = filter.getItems();
-            }
+    public String getFilterName(String item) {
+        for (Map.Entry<String, List<String>> entry : filters.entrySet()) {
+            List<String> grouping = getFilterItems(entry.getKey());
 
             if (grouping.contains(item)) {
-                filterName = filter.getName();
+                return entry.getKey();
             }
         }
 
-        return filterName;
+        return "";
     }
+
+    public List<String> getFilterItems(String filterName) {
+        List<String> filterItems = filters.get(filterName);
+        List<String> grouping;
+
+        if (filterItems.getFirst().startsWith("_")) {
+            grouping = Arrays.stream(Material.values())
+                    .map(material -> material.name().toLowerCase(Locale.ROOT))
+                    .filter(name -> name.endsWith(filterItems.getFirst()))
+                    .toList();
+        } else {
+            grouping = filterItems;
+        }
+
+        return grouping;
+    }
+
+    public Map<String, List<String>> getFilters() { return filters; }
 }
