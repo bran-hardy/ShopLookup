@@ -80,11 +80,9 @@ public class NotionService {
                 return false;
             }
         } catch (IOException ex) {
-            //ShopLookup.plugin.getLogger().severe("Network error while testing Notion connection: " + ex.getMessage());
             ex.printStackTrace();
             return false;
         } catch (InterruptedException ex) {
-            //ShopLookup.plugin.getLogger().severe("Connection test was interrupted: " + ex.getMessage());
             ex.printStackTrace();
             Thread.currentThread().interrupt();
             return false;

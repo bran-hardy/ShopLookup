@@ -7,12 +7,14 @@ import io.github.branhardy.shopLookup.models.Filters;
 
 import java.io.*;
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class FilterUtil {
     public static Filters loadData() {
-        Filters filters = null;
+        Map<String, List<String>> emptyMap = new HashMap<>();
+        Filters filters = new Filters(emptyMap);
 
         Gson gson = new Gson();
         File file = new File(ShopLookup.plugin.getDataFolder(), "filters.json");
@@ -21,7 +23,9 @@ public class FilterUtil {
             try (Reader reader = new FileReader(file)) {
                 Type type = new TypeToken<Map<String, List<String>>>(){}.getType();
                 Map<String, List<String>> filterMap = gson.fromJson(reader, type);
-                filters = new Filters(filterMap);
+                if (filterMap != null) {
+                    filters = new Filters(filterMap);
+                }
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

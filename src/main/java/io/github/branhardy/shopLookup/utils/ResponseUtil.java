@@ -4,11 +4,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import io.github.branhardy.shopLookup.ShopLookup;
 import io.github.branhardy.shopLookup.models.Shop;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ResponseUtil {
 
@@ -23,15 +26,13 @@ public class ResponseUtil {
                     .getAsJsonObject()
                     .getAsJsonObject("properties");
 
-            String title = extractTitle(properties.getAsJsonObject("Shop Name"));
-            String coordinates = extractRichText(properties.getAsJsonObject("Coords (X, Z)"));
-            String district = extractSelect(properties.getAsJsonObject("Spawn"));
-            //List<String> inventory = extractMultiSelect(properties.getAsJsonObject("Inventory"));
-            String inventory = extractRichText(properties.getAsJsonObject("Inventory"));
-            String owners = extractRichText(properties.getAsJsonObject("Owner IGN"));
+            String title       = extractProperty(properties, "Shop Name");
+            String coordinates = extractProperty(properties, "Coords (X, Z)");
+            String district    = extractProperty(properties, "Spawn");
+            String inventory   = extractProperty(properties, "Inventory");
+            String owners      = extractProperty(properties, "Owner IGN");
 
             List<String> inventoryList = Arrays.asList(inventory.split("\\s*,\\s*"));
-
             inventoryList.replaceAll(s -> s.toLowerCase().replace(" ", "_"));
 
             Shop shop = new Shop(title, coordinates, inventoryList, !district.isEmpty() ? district : "", owners);
@@ -41,12 +42,26 @@ public class ResponseUtil {
         return shops;
     }
 
-    private static String extractTitle(JsonObject titleProperty) {
-        JsonArray titleArray = titleProperty.getAsJsonArray("title");
-
-        if (titleArray.isEmpty()) {
+    private static String extractProperty(@NotNull JsonObject properties, String propertyName) {
+        if (!properties.has(propertyName)) {
+            ShopLookup.plugin.getLogger().severe("Not information received for the property name: " + propertyName);
             return "";
         }
+
+        JsonObject property = properties.getAsJsonObject(propertyName);
+
+        if (property.has("title"))        return extractTitle(property);
+        if (property.has("rich_text"))    return extractRichText(property);
+        if (property.has("select"))       return extractSelect(property);
+        if (property.has("multi_select")) return extractMultiSelect(property);
+
+        return "";
+    }
+
+    private static String extractTitle(@NotNull JsonObject titleProperty) {
+        JsonArray titleArray = titleProperty.getAsJsonArray("title");
+
+        if (titleArray == null || titleArray.isEmpty()) return "";
 
         return titleArray
                 .get(0)
@@ -56,12 +71,10 @@ public class ResponseUtil {
                 .getAsString();
     }
 
-    private static String extractRichText(JsonObject richTextProperty) {
+    private static String extractRichText(@NotNull JsonObject richTextProperty) {
         JsonArray richTextArray = richTextProperty.getAsJsonArray("rich_text");
 
-        if (richTextArray.isEmpty()) {
-            return "";
-        }
+        if (richTextArray == null || richTextArray.isEmpty()) return "";
 
         return richTextArray
                 .get(0)
@@ -71,25 +84,25 @@ public class ResponseUtil {
                 .getAsString();
     }
 
-    private static List<String> extractMultiSelect(JsonObject itemsProperty) {
+    private static String extractMultiSelect(@NotNull JsonObject itemsProperty) {
         JsonArray multiSelectArray = itemsProperty.getAsJsonArray("multi_select");
 
-        List<String> items = new ArrayList<>();
+        if (multiSelectArray == null || multiSelectArray.isEmpty()) return "";
 
+        StringBuilder items = new StringBuilder();
         for (int i = 0; i < multiSelectArray.size(); i ++) {
-            items.add(multiSelectArray.get(i).getAsJsonObject().get("name").getAsString());
+            items.append(multiSelectArray.get(i).getAsJsonObject().get("name").getAsString());
+            if (i != multiSelectArray.size()) items.append(",");
         }
 
-        return items;
+        return items.toString();
     }
 
-    private static String extractSelect(JsonObject itemsProperty) {
+    private static String extractSelect(@NotNull JsonObject itemsProperty) {
         JsonElement selectElement = itemsProperty.get("select");
 
-        if (selectElement.isJsonNull()) {
-            return "";
-        } else {
-            return selectElement.getAsJsonObject().get("name").getAsString();
-        }
+        if (selectElement.isJsonNull()) return "";
+
+        return selectElement.getAsJsonObject().get("name").getAsString();
     }
 }

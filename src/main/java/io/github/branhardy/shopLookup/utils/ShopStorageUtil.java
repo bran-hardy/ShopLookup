@@ -11,6 +11,8 @@ import java.util.List;
 
 public class ShopStorageUtil {
 
+    private static final Object cacheLock = new Object();
+
     public static List<Shop> getShops(NotionService notionService) {
         ShopStorage shopStorage = new ShopStorage(0, List.of());
 
@@ -18,28 +20,29 @@ public class ShopStorageUtil {
             shopStorage = loadData(notionService);
         } catch (IOException ex) {
             ex.printStackTrace();
-            //ShopLookup.plugin.getLogger().severe("Failed to load shops.json: " + ex.getMessage());
         }
 
         return shopStorage.getShops();
     }
 
     public static ShopStorage loadData(NotionService notionService) throws IOException {
-        ShopStorage shopStorage = loadFromFile();
+        synchronized (cacheLock) {
+            ShopStorage shopStorage = loadFromFile();
 
-        // Checks if the cached time in shops.json has expired, update shop.json with notion data if it has
-        if (System.currentTimeMillis() > shopStorage.getExpiryTime()) {
-            long duration = ShopLookup.plugin.getConfig().getLong("update-frequency");
-            long newExpiryTime = System.currentTimeMillis() + duration;
+            // Checks if the cached time in shops.json has expired, update shop.json with notion data if it has
+            if (System.currentTimeMillis() > shopStorage.getExpiryTime()) {
+                long duration = ShopLookup.plugin.getConfig().getLong("update-frequency");
+                long newExpiryTime = System.currentTimeMillis() + duration;
 
-            String response = notionService.queryDatabase();
-            List<Shop> shops = ResponseUtil.ConvertToShops(response);
+                String response = notionService.queryDatabase();
+                List<Shop> shops = ResponseUtil.ConvertToShops(response);
 
-            shopStorage = new ShopStorage(newExpiryTime, shops);
-            updateData(shopStorage);
+                shopStorage = new ShopStorage(newExpiryTime, shops);
+                updateData(shopStorage);
+            }
+
+            return shopStorage;
         }
-
-        return shopStorage;
     }
 
     public static ShopStorage loadFromFile() {
@@ -55,7 +58,6 @@ public class ShopStorageUtil {
                 reader.close();
             } catch (IOException ex) {
                 ex.printStackTrace();
-                //ShopLookup.plugin.getLogger().severe("Failed to load shops.json: " + ex.getMessage());
             }
         }
 
